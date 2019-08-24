@@ -21,7 +21,7 @@ class Test_initialization_wrong_args(unittest.TestCase):
             ftdbb.Port([], debug_mode=True)
 
         with self.assertRaisesRegex(ValueError, "IOPin"):
-            ftdbb.Port([1,2,3], debug_mode=True)
+            ftdbb.Port([1, 2, 3], debug_mode=True)
 
         # with self.assertRaisesRegex(ValueError, "SCK.*not unique"):
         #     ftdbb.Port([self.pin_ck, ftdbb.IOPin("SCK", 7)], debug_mode=True)
@@ -51,8 +51,8 @@ class Test_initialization_wrong_args(unittest.TestCase):
 
     def test_open(self):
         with self.assertRaisesRegex(OSError, "Can't open"):
-            spi = ftdbb.Port([self.pin_lres, self.pin_lcs, self.pin_ck, self.pin_td, self.pin_rd],
-                             debug_mode=False)
+            _ = ftdbb.Port([self.pin_lres, self.pin_lcs, self.pin_ck, self.pin_td, self.pin_rd],
+                           debug_mode=False)
 
     def test_getpin(self):
         spi = ftdbb.Port([self.pin_lres, self.pin_lcs, self.pin_ck, self.pin_td, self.pin_rd],
@@ -67,7 +67,7 @@ class Test_initialization_wrong_args(unittest.TestCase):
     def test_data_send(self):
         spi = ftdbb.Port([self.pin_lres, self.pin_lcs, self.pin_ck, self.pin_td, self.pin_rd],
                          debug_mode=True)
-        #After reset, initial value (LRES, LCS, CK, TD) = (1, 1, 0, 0) should be sent
+        # After reset, initial value (LRES, LCS, CK, TD) = (1, 1, 0, 0) should be sent
         self.assertEqual(len(spi.signal_history), 1)
         self.assertEqual(spi.signal_history[0], 0x28)
 
