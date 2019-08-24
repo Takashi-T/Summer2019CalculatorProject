@@ -14,6 +14,7 @@ import time
 # Uses ftd2xx. This is a Python wrapper for FTDI's D2XX library.
 import ftd2xx
 
+
 class IOPin(object):
     """
     This is an abstraction of each GPIO pins in the asynchronous big bang mode.
@@ -33,6 +34,7 @@ class IOPin(object):
         self.name = name
         self.is_output = is_output
         self.value = 1 if init_val else 0
+
 
 class Port(object):
     """
@@ -288,6 +290,10 @@ class SPI(object):
             raise ValueError("Pins must have unique pin numbers.")
         if not self.ck.is_output or not self.txd.is_output or self.rxd.is_output:
             raise ValueError("Pins do not have right in/out attribute.")
+
+        # Make sure CLK is low (idle)
+        self.ck.value = 0
+        self.port.set_pins()
 
     def send_byte(self, value):
         """
