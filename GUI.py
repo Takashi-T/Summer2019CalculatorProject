@@ -9,7 +9,7 @@
 #  Copyright (C) 2019.  Takashi Totsuka. All rights reserved.
 ##################################################################
 
-from PyQt5.QtWidgets import QApplication, QGridLayout, QVBoxLayout, QHBoxLayout, \
+from PyQt5.QtWidgets import QApplication, QGridLayout, QVBoxLayout, QHBoxLayout, QSizePolicy,\
     QWidget, QFrame, QLabel, QPushButton, QLineEdit
 from PyQt5 import QtCore, QtGui
 
@@ -61,7 +61,6 @@ class MainPanel(QWidget):
         l3.setPixmap(l_arrow)
         l4 = QLabel("B to D")
         l4.setPixmap(l_arrow)
-
         mp.addWidget(self.decimal_inputs, 0, 0, alignment=QtCore.Qt.AlignVCenter)
         mp.addWidget(l1, 0, 1, alignment=QtCore.Qt.AlignVCenter)
         mp.addWidget(self.binary_inputs, 0, 2, alignment=QtCore.Qt.AlignVCenter)
@@ -143,12 +142,23 @@ class DecimalInputData(QFrame):
         dec_input_b.setFont(f)
 
         hl = QHBoxLayout()
-        btn_clr = QPushButton("C")
+        btn_clr = QPushButton("CLR")
         btn_clr.clicked.connect(self.cbf_clear)
+        btn_clr.setStyleSheet("QPushButton {background:blue; color: white; font: bold 12pt} "
+                              "QPushButton:pressed {background:darkblue}")
+        sp = QSizePolicy()
+        sp.setVerticalPolicy(QSizePolicy.Expanding)
+        btn_clr.setSizePolicy(sp)
+
         btn_add = QPushButton("RUN\n+")
         btn_add.clicked.connect(lambda : self.cbf_run(is_plus=True))
+        btn_add.setStyleSheet("QPushButton {background:crimson; color: white; font: bold 12pt} "
+                              "QPushButton:pressed {background:darkred}")
+
         btn_sub = QPushButton("RUN\n-")
         btn_sub.clicked.connect(lambda : self.cbf_run(is_plus=False))
+        btn_sub.setStyleSheet("QPushButton {background:crimson; color: white; font: bold 12pt}"
+                              "QPushButton:pressed {background:darkred}")
         hl.addWidget(btn_clr)
         hl.addWidget(btn_add)
         hl.addWidget(btn_sub)
