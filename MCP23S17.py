@@ -56,11 +56,11 @@ class MCP23S17(object):
         # Note: After reset, HAEN` is disabled and every device is mapped to device address 0.
         # Writing HAEN=1 to IOCON at device address 0 after a reset is a broadcast message
         # to move all the devices to the hardware address mode.
-        self.write_register(0, 0xa, 0x88) # IOCONA BANK=1, SEQ=0(ByteMode), HAEN=1
+        self.write_register(0, 0xa, 0x88) # IOCON BANK=1, SEQ=0(ByteMode), HAEN=1
 
     def reset_devices(self):
         """
-        Hardware eset MCP devices.
+        Hardware reset MCP devices.
         """
         self.cs.value = 1
         self.reset.value = 0
@@ -95,7 +95,7 @@ class MCP23S17(object):
         self.spi.send_byte(data & 0xff)
 
         # Disable /CS
-        self.spi.lcs = 1
+        self.cs.value = 1
         self.port.set_pins()
 
     def read_register(self, dev, reg):
@@ -130,3 +130,41 @@ class MCP23S17(object):
         self.port.set_pins()
 
         return val
+
+
+if __name__ == "__main__":
+    import FTDIAsyncBB as Ftdbb
+    pin_ck = Ftdbb.IOPin(0, "SCK", is_output=True, init_val=0)
+    pin_td = Ftdbb.IOPin(1, "STXD", is_output=True, init_val=0)
+    pin_rd = Ftdbb.IOPin(2, "SRXD", is_output=False)
+    pin_lcs = Ftdbb.IOPin(3, "/CS", is_output=True, init_val=1)
+    pin_lres = Ftdbb.IOPin(5, "/RESET", is_output=True, init_val=1)
+    port = Ftdbb.Port([pin_lres, pin_lcs, pin_ck, pin_td, pin_rd], debug_mode=False)
+
+    # Create the MCP23S17 device control object.
+    mcp = MCP23S17(port, 0, 1, 2, 3, 5)
+    for a in range(11):
+        v0 = mcp.read_register(0, a)
+        v1 = mcp.read_register(1, a)
+        print("Address {:02x}  D1 value {:02x}   D2 value {:02x}".format(a, v0, v1))
+    print()
+    for a in range(16, 27):
+        v0 = mcp.read_register(0, a)
+        v1 = mcp.read_register(1, a)
+        print("Address {:02x}  D1 value {:02x}   D2 value {:02x}".format(a, v0, v1))
+
+    a = input("Write Address:")
+    a = int(a)
+    v = input("Write data")
+    v = int(v)
+    print("Write address={}, Value={:x}".format(a, v))
+    mcp.write_register(0, a, v)
+    for a in range(11):
+        v0 = mcp.read_register(0, a)
+        v1 = mcp.read_register(1, a)
+        print("Address {:02x}  D1 value {:02x}   D2 value {:02x}".format(a, v0, v1))
+    print()
+    for a in range(16, 27):
+        v0 = mcp.read_register(0, a)
+        v1 = mcp.read_register(1, a)
+        print("Address {:02x}  D1 value {:02x}   D2 value {:02x}".format(a, v0, v1))
