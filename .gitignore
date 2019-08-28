@@ -1,3 +1,5 @@
+./.gitignore
 __pycache__/**
 .idea/**
 _build/**
+obsolete/**
