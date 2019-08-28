@@ -45,7 +45,9 @@ class MainPanel(QWidget):
         self.snapshots = SnapShots()
 
         r_arrow = QtGui.QPixmap()
-        r_arrow.load("arrow.gif")
+        r_arrow.load("arrow-grey3.bmp")
+        r_pix = r_arrow.toImage().scaledToWidth(60)
+        r_arrow = QtGui.QPixmap(r_pix)
         arrow_mask = r_arrow.createHeuristicMask()
         r_arrow.setMask(arrow_mask)
 
