@@ -303,6 +303,12 @@ class SPI(object):
             value (int): A byte data to be sent.
         """
 
+        # Check the clock. SPI mode 0,0 requires CLK=0 during idle.
+        if self.ck.value != 0:
+            print("Warning: FTDIAsyncBB.SPI.send_byte: clock is not low.")
+            self.ck.value = 0
+            self.port.set_pins()
+
         # Serialize and send one byte. MSB first.
         for i in range(7, -1, -1):
             # Feed one bit data to the MPC23S17
@@ -326,7 +332,7 @@ class SPI(object):
         """
         # Check the clock. SPI mode 0,0 requires CLK=0 during idle.
         if self.ck.value != 0:
-            print("Warning: SPI:receive_byte: clock is not low.")
+            print("Warning: FTDIAsyncBB.SPI.receive_byte: clock is not low.")
             self.ck.value = 0
             self.port.set_pins()
 
@@ -349,3 +355,17 @@ class SPI(object):
             self.port.set_pins()
 
         return val
+
+if __name__ == "__main__":
+    pin_ck = IOPin(0, "SCK", is_output=True, init_val=0)
+    pin_td = IOPin(1, "STXD", is_output=True, init_val=0)
+    pin_rd = IOPin(2, "SRXD", is_output=False)
+    pin_lcs = IOPin(3, "/CS", is_output=True, init_val=1)
+    port = Port([pin_lcs, pin_ck, pin_td, pin_rd], debug_mode=False)
+    for _ in range(5):
+        v = input("Value ")
+        v = int(v)
+        pin_ck.value = v & 1
+        pin_td.value = (v >> 1) & 1
+        pin_lcs.value = (v >> 3) & 1
+        port.set_pins()
