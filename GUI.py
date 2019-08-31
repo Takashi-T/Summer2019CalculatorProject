@@ -40,7 +40,7 @@ class MainPanel(QWidget):
 
         self.decimal_output = DecimalOutputData()
         self.binary_output = BinaryOutputData()
-        self.set_output_value(0)
+        self.set_output_value(0, 0)
 
         self.snapshots = SnapShots()
 
@@ -93,15 +93,18 @@ class MainPanel(QWidget):
     def set_run_callback(self, f):
         self.run_callback = f
 
-    def set_output_value(self, value_y):
+    def set_output_value(self, raw_value_y, value_y):
         self.decimal_output.set_value(value_y)
-        self.binary_output.set_value(value_y)
+        self.binary_output.set_value(raw_value_y)
+
+    def set_snapshots(self, l_t, l_v):
+        self.snapshots.set_snapshots(l_t, l_v)
 
     def _cb_clear_button(self):
         # GUI clean up
         self.decimal_inputs.set_values((0, 0))
         self.binary_inputs.set_values((0, 0))
-        self.set_output_value(0)
+        self.set_output_value(0, 0)
 
         # Call call back function
         if self.clear_callback is not None:
@@ -298,10 +301,15 @@ class SnapShots(QFrame):
         vl = QLabel("Value")
         gl.addWidget(vl, 0, 1, alignment=QtCore.Qt.AlignCenter)
 
+        self.l_widget_time = []
+        self.l_widget_val = []
         for r in range(1, 11):
             tl = QLabel("{:.3f}  ".format(r * 0.01))
+            self.l_widget_time.append(tl)
             gl.addWidget(tl, r, 0)
+
             vl = QLabel("000000000")
+            self.l_widget_val.append(vl)
             f = vl.font()
             _modify_number_font(f, bold=False)
             vl.setFont(f)
@@ -311,7 +319,25 @@ class SnapShots(QFrame):
         self.setFrameShape(QFrame.Box)
         self.setFrameShadow(QFrame.Sunken)
         self.setLineWidth(1)
-        self.setMidLineWidth(1)
+        self.setMidLineWidth(2)
+
+    def set_snapshots(self, l_timestamp, l_value):
+        n_rows = len(self.l_widget_time)
+        n_snapshots = len(l_timestamp)
+        step = n_snapshots / n_rows
+        print("Snapshot step={}".format(step))
+        if step < 1:
+            step = 1
+        for r in range(n_rows):
+            tl = self.l_widget_time[r]
+            vl = self.l_widget_val[r]
+            ix_snap = int(r * step)
+            if r >= len(l_timestamp):
+                tl.setText(" ")
+                vl.setText(" ")
+            else:
+                tl.setText("{:.3f}".format(l_timestamp[ix_snap]))
+                vl.setText("{:09b}".format(l_value[ix_snap]))
 
 
 if __name__ == "__main__":
@@ -324,7 +350,7 @@ if __name__ == "__main__":
         print("Run call back is called A={}, B~{}, OP={}".format(a, b, "ADD" if is_plus else "SUB"))
         # This is a temporary hack
         y = (a + b) if is_plus else (a - b)
-        win.set_output_value(y)
+        win.set_output_value(y, y)
 
     app = QApplication(sys.argv)
     win = MainPanel()
