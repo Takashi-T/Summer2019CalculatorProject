@@ -61,38 +61,43 @@ class MainControl(object):
     def _run_cb(self, a, b, is_plus=True):
         print("Run call back is called A={}, B={}, OP={}".format(a, b, "ADD" if is_plus else "SUB"))
 
+        # Take 2's comp of B if this is a subtraction
+        b_feed = b if is_plus else 0 - b
+
         # Set values to the A and B ports
         self.mcp.write_register(0, 0x9, a & 0xff)  # Set A value to GPIOA
-        self.mcp.write_register(0, 0x19, b & 0xff)  # Set B value to GPIOB
 
-        # # Sense and collect output port till the value converges.
-        # l_outvalues = []
-        # l_timestamp = []
-        # start_time = time.time()
-        # for _ in range(20):
-        #     t1 = time.time()
-        #     vl = self.mcp.read_register(1, 0x9)  # Read b0-7 from GPIOA
-        #     vh = self.mcp.read_register(1, 0x19)  # Read b8 from GPIOB
-        #     t2 = time.time()
-        #     v = ((vh & 1) << 8) | (vl & 0xff)
-        #     l_outvalues.append(v)
-        #     l_timestamp.append((t1 + t2)/2.0 - start_time)
-        #
-        #     # Check if the value converges.
-        #     if len(l_outvalues) < 3:
-        #         continue
-        #     if l_outvalues[-1] == l_outvalues[-2] == l_outvalues[-3]:
-        #         break
+        self.mcp.write_register(0, 0x19, b_feed & 0xff)  # Set B value to GPIOB
 
-        # self.main_panel.set_output_value(l_outvalues[-1])
+        # Sense and collect output port till the value converges.
+        l_outvalues = []
+        l_timestamp = []
+        start_time = time.time()
+        for _ in range(40):
+            t1 = time.time()
+            vl = self.mcp.read_register(1, 0x9)  # Read b0-7 from GPIOA
+            vh = self.mcp.read_register(1, 0x19)  # Read b8 from GPIOB
+            t2 = time.time()
+            v = ((vh & 1) << 8) | (vl & 0xff)
+            l_outvalues.append(v)
+            l_timestamp.append((t1 + t2)/2.0 - start_time)
 
-        # This is a temporary hack
-        # y = (a + b) if is_plus else (a - b)
-        vl = self.mcp.read_register(1, 0x9)  # Read b0-7 from GPIOA
-        vh = self.mcp.read_register(1, 0x19)  # Read b8 from GPIOB
-        print("VL={:x}, VH={:x}".format(vl, vh))
-        y = ((vh & 1) << 8) | (vl & 0xff)
-        self.main_panel.set_output_value(y)
+            # Check if the value converges.
+            if len(l_outvalues) < 3:
+                continue
+            if l_outvalues[-1] == l_outvalues[-2] == l_outvalues[-3]:
+                break
+
+        print("Snap shots collected: {}".format(len(l_timestamp)))
+        # print("Time stamp", l_timestamp)
+        # print("Values", l_outvalues)
+        self.main_panel.set_snapshots(l_timestamp, l_outvalues)
+
+        raw_y = y = l_outvalues[-1]
+        if not is_plus:
+            # Reconvert from 2's comp
+            y = -((~y + 1) & 0x1ff)
+        self.main_panel.set_output_value(raw_y, y)
 
 
 if __name__ == "__main__":
