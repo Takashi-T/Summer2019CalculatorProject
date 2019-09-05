@@ -82,10 +82,14 @@ class MainControl(object):
             l_outvalues.append(v)
             l_timestamp.append((t1 + t2)/2.0 - start_time)
 
-            # Check if the value converges.
-            if len(l_outvalues) < 3:
+            # Loop through if elapsed time is too short or collected data is too few.
+            if (t2 - start_time) < 0.02:
                 continue
-            if l_outvalues[-1] == l_outvalues[-2] == l_outvalues[-3]:
+            if len(l_outvalues) < 5:
+                continue
+
+            # Check output convergence
+            if l_outvalues[-1] == l_outvalues[-3] == l_outvalues[-5]:
                 break
 
         print("Snap shots collected: {}".format(len(l_timestamp)))
@@ -95,12 +99,17 @@ class MainControl(object):
 
         raw_y = y = l_outvalues[-1]
         if not is_plus:
-            # Reconvert from 2's comp
-            y = -((~y + 1) & 0x1ff)
+            if (a - b) < 0:
+                # Reconvert from 2's comp
+                y = -((~y + 1) & 0xff)
+            else:
+                y = y & 0xff
+
         self.main_panel.set_output_value(raw_y, y)
 
 
 if __name__ == "__main__":
+    print(sys.path)
     app = QApplication(sys.argv)
     mc = MainControl()
     sys.exit(app.exec_())
