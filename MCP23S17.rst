@@ -1,0 +1,7 @@
+MCP23S17 module
+==================
+
+.. automodule:: MCP23S17
+    :members:
+    :undoc-members:
+    :show-inheritance:
