@@ -130,7 +130,7 @@ class DecimalInputData(QFrame):
 
         # Widgets for the input data A
         label_a = QLabel("Input A")
-        dec_input_a = QLineEdit("109")
+        dec_input_a = QLineEdit("0")
         dec_input_a.setInputMask("999")  # Acceptable string is [0-9][0-9][0-9] in regexp.
         dec_input_a.setMaximumWidth(100)
         f = dec_input_a.font()
@@ -139,7 +139,7 @@ class DecimalInputData(QFrame):
 
         # Widgets for the input data B
         label_b = QLabel("Input B")
-        dec_input_b = QLineEdit("216")
+        dec_input_b = QLineEdit("0")
         dec_input_b.setInputMask("999")  # Acceptable string is [0-9][0-9][0-9] in regexp.
         dec_input_b.setMaximumWidth(100)
         f = dec_input_b.font()
@@ -242,7 +242,7 @@ class DecimalOutputData(QFrame):
         super().__init__()
 
         dec_label_y = QLabel("Output Y")
-        value_y = QLabel("139")
+        value_y = QLabel("0")
         f = value_y.font()
         _modify_number_font(f)
         value_y.setFont(f)
@@ -259,7 +259,7 @@ class DecimalOutputData(QFrame):
         self.setMidLineWidth(1)
 
     def set_value(self, value_y):
-        value_y &= 0x1ff
+        # value_y &= 0x1ff
         str_y = "{:d}".format(value_y)
         self.value_y.setText(str_y)
 
